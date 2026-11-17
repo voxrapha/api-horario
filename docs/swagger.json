@@ -1,0 +1,95 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API REST para consulta de data e hora atual por timezone IANA.",
+        "title": "API Horário Mundial",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/api/v1/horario": {
+            "get": {
+                "description": "Retorna a data (DD/MM/AAAA) e hora (HH:MM:SS) de um timezone no padrão IANA.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "horario"
+                ],
+                "summary": "Consulta data e hora atual",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Timezone IANA (ex: America/Sao_Paulo)",
+                        "name": "timezone",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.HorarioResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErroResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Informa se a API está disponível.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Verifica a saúde da API",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handler.ErroResponse": {
+            "type": "object",
+            "properties": {
+                "erro": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.HorarioResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
+                },
+                "hora": {
+                    "type": "string"
+                },
+                "timezone": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

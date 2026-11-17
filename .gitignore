@@ -1,0 +1,13 @@
+# Binários compilados
+bin/
+api-horario
+*.exe
+prox_passos.md
+ENTENDENDO_GO.md
+# Arquivos de cobertura de testes
+coverage.out
+*.coverprofile
+
+# Pastas de IDE
+.vscode/
+.idea/

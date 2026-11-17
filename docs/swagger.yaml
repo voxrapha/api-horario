@@ -1,0 +1,63 @@
+basePath: /
+definitions:
+  handler.ErroResponse:
+    properties:
+      erro:
+        type: string
+    type: object
+  service.HorarioResponse:
+    properties:
+      data:
+        type: string
+      hora:
+        type: string
+      timezone:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API REST para consulta de data e hora atual por timezone IANA.
+  title: API Horário Mundial
+  version: "1.0"
+paths:
+  /api/v1/horario:
+    get:
+      description: Retorna a data (DD/MM/AAAA) e hora (HH:MM:SS) de um timezone no
+        padrão IANA.
+      parameters:
+      - description: 'Timezone IANA (ex: America/Sao_Paulo)'
+        in: query
+        name: timezone
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.HorarioResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErroResponse'
+      summary: Consulta data e hora atual
+      tags:
+      - horario
+  /health:
+    get:
+      description: Informa se a API está disponível.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Verifica a saúde da API
+      tags:
+      - health
+swagger: "2.0"
