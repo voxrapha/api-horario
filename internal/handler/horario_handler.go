@@ -38,6 +38,20 @@ func GetHorarioHandler(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(resultado)
 }
 
+// GetTimezonesHandler godoc
+// @Summary      Lista fusos horários IANA disponíveis
+// @Description  Retorna os identificadores IANA embutidos na versão de dados de fuso usada pelo projeto, incluindo aliases legados distribuídos com a base.
+// @Tags         fusos
+// @Produce      json
+// @Success      200  {object}  service.TimezonesResponse
+// @Router       /api/v1/timezones [get]
+// GetTimezonesHandler returns the supported IANA timezone identifiers.
+func GetTimezonesHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(service.ListarTimezones())
+}
+
 // HealthCheckHandler godoc
 // @Summary      Verifica a saúde da API
 // @Description  Informa se a API está disponível.

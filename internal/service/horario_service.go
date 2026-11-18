@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 	"time"
+	_ "time/tzdata"
 )
 
 // HorarioResponse representa o payload de retorno da API
@@ -18,6 +19,9 @@ func ObterHorarioAtual(timezone string) (HorarioResponse, error) {
 	tz := strings.TrimSpace(timezone)
 	if tz == "" {
 		return HorarioResponse{}, errors.New("o parâmetro timezone é obrigatório")
+	}
+	if !IsTimezoneSupported(tz) {
+		return HorarioResponse{}, errors.New("timezone inválido: utilize o padrão IANA (ex: America/Sao_Paulo)")
 	}
 
 	loc, err := time.LoadLocation(tz)

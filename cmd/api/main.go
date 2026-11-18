@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	_ "time/tzdata"
 
 	httpSwagger "github.com/swaggo/http-swagger"
 	_ "github.com/zzRaphazz/api-horario/docs"
@@ -18,22 +17,27 @@ import (
 // @host            localhost:8080
 // @BasePath        /
 func main() {
-	mux := http.NewServeMux()
+	server := newServer(os.Getenv("PORT"))
+	log.Printf("Servidor iniciado na porta http://localhost%s...", server.Addr)
 
-	// Rotas usando o novo padrão do Go 1.22+ (Método + Caminho)
-	mux.HandleFunc("GET /health", handler.HealthCheckHandler)
-	mux.HandleFunc("GET /api/v1/horario", handler.GetHorarioHandler)
-	mux.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
+	if err := server.ListenAndServe(); err != nil {
+		log.Fatalf("Erro ao iniciar o servidor: %v", err)
+	}
+}
 
-	porta := os.Getenv("PORT")
-	if porta == "" {
-		porta = "8080"
+func newServer(port string) *http.Server {
+	if port == "" {
+		port = "8080"
 	}
 
-	endereco := fmt.Sprintf(":%s", porta)
-	log.Printf("Servidor iniciado na porta http://localhost:%s...", porta)
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /health", handler.HealthCheckHandler)
+	mux.HandleFunc("GET /api/v1/horario", handler.GetHorarioHandler)
+	mux.HandleFunc("GET /api/v1/timezones", handler.GetTimezonesHandler)
+	mux.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
 
-	if err := http.ListenAndServe(endereco, mux); err != nil {
-		log.Fatalf("Erro ao iniciar o servidor: %v", err)
+	return &http.Server{
+		Addr:    fmt.Sprintf(":%s", port),
+		Handler: mux,
 	}
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"slices"
 	"testing"
 	"time"
 )
@@ -41,6 +42,11 @@ func TestObterHorarioAtual(t *testing.T) {
 			timezone:   "Planeta/Marte",
 			esperaErro: true,
 		},
+		{
+			nome:       "Erro quando timezone local nao pertence a lista IANA",
+			timezone:   "Local",
+			esperaErro: true,
+		},
 	}
 
 	for _, tc := range testes {
@@ -72,5 +78,57 @@ func TestObterHorarioAtual(t *testing.T) {
 				t.Errorf("formato de hora inválido (%s): %v", resp.Hora, err)
 			}
 		})
+	}
+}
+
+func TestListarTimezones(t *testing.T) {
+	resposta := ListarTimezones()
+	timezones := resposta.Timezones
+
+	if len(timezones) < 500 {
+		t.Fatalf("esperava pelo menos 500 identificadores IANA, recebeu %d", len(timezones))
+	}
+	if !slices.IsSorted(timezones) {
+		t.Fatal("identificadores de timezone devem estar ordenados")
+	}
+
+	encontrados := make(map[string]bool, len(timezones))
+	for _, timezone := range timezones {
+		if encontrados[timezone] {
+			t.Errorf("identificador duplicado: %s", timezone)
+		}
+		encontrados[timezone] = true
+
+		if resposta, err := ObterHorarioAtual(timezone); err != nil {
+			t.Errorf("identificador listado não pode ser usado na consulta (%s): %v", timezone, err)
+		} else if resposta.Timezone != timezone {
+			t.Errorf("timezone esperado %s, recebeu %s", timezone, resposta.Timezone)
+		}
+	}
+
+	for _, timezone := range []string{
+		"Africa/Tunis",
+		"America/Maceio",
+		"Europe/Madrid",
+		"UTC",
+		"US/Pacific",
+	} {
+		if !encontrados[timezone] {
+			t.Errorf("identificador esperado não encontrado: %s", timezone)
+		}
+	}
+	if encontrados["America/Sergipe"] {
+		t.Error("lista oficial não deve incluir aliases próprios da API")
+	}
+}
+
+func TestListarTimezonesReturnsIndependentSlice(t *testing.T) {
+	primeiraResposta := ListarTimezones()
+	primeiroTimezone := primeiraResposta.Timezones[0]
+	primeiraResposta.Timezones[0] = "alterado"
+
+	segundaResposta := ListarTimezones()
+	if segundaResposta.Timezones[0] != primeiroTimezone {
+		t.Fatal("modificar a resposta não deve alterar a lista compartilhada")
 	}
 }
