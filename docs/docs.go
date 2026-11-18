@@ -50,6 +50,26 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/timezones": {
+            "get": {
+                "description": "Retorna os identificadores IANA embutidos na versão de dados de fuso usada pelo projeto, incluindo aliases legados distribuídos com a base.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "fusos"
+                ],
+                "summary": "Lista fusos horários IANA disponíveis",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.TimezonesResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Informa se a API está disponível.",
@@ -94,6 +114,17 @@ const docTemplate = `{
                 },
                 "timezone": {
                     "type": "string"
+                }
+            }
+        },
+        "service.TimezonesResponse": {
+            "type": "object",
+            "properties": {
+                "timezones": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         }

@@ -14,6 +14,13 @@ definitions:
       timezone:
         type: string
     type: object
+  service.TimezonesResponse:
+    properties:
+      timezones:
+        items:
+          type: string
+        type: array
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -45,6 +52,20 @@ paths:
       summary: Consulta data e hora atual
       tags:
       - horario
+  /api/v1/timezones:
+    get:
+      description: Retorna os identificadores IANA embutidos na versão de dados de
+        fuso usada pelo projeto, incluindo aliases legados distribuídos com a base.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.TimezonesResponse'
+      summary: Lista fusos horários IANA disponíveis
+      tags:
+      - fusos
   /health:
     get:
       description: Informa se a API está disponível.

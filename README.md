@@ -1,6 +1,6 @@
 # 🕒 API Horário Mundial (Go / Golang)
 
-API REST desenvolvida em **Go (Golang)** para consulta de data (`DD/MM/AAAA`) e hora (`HH:MM:SS`) atuais de qualquer localidade do mundo utilizando o padrão de fuso horário **IANA** (ex: `America/Sao_Paulo`, `Europe/London`, `Asia/Tokyo`).
+API REST desenvolvida em **Go (Golang)** para consulta de data (`DD/MM/AAAA`) e hora (`HH:MM:SS`) atuais usando identificadores de fuso horário **IANA** (ex: `America/Sao_Paulo`, `Europe/London`, `Asia/Tokyo`). O endpoint de listagem mostra os fusos disponíveis; várias cidades podem compartilhar o mesmo fuso.
 
 Projeto construído com foco em boas práticas de engenharia de software, arquitetura limpa, testes automatizados, documentação e preparação para deploy em nuvem (VM/EC2).
 
@@ -12,7 +12,8 @@ api-horario/
 │       └── ci.yml
 ├── cmd/
 │   └── api/
-│       └── main.go
+│       ├── main.go
+│       └── main_test.go
 ├── docs/
 │   ├── docs.go
 │   ├── swagger.json
@@ -23,7 +24,9 @@ api-horario/
 │   │   └── horario_handler_test.go
 │   └── service/
 │       ├── horario_service.go
-│       └── horario_service_test.go
+│       ├── horario_service_test.go
+│       ├── timezones.go
+│       └── timezones.txt
 ├── tests/
 │   └── load/
 │       └── horario.js
@@ -99,7 +102,37 @@ curl -i "http://localhost:8080/api/v1/horario?timezone=America/Sao_Paulo"
 
 ---
 
-### 2. Health Check
+### 2. Listar fusos horários IANA
+Retorna os identificadores IANA aceitos pela API em ordem alfabética. A lista inclui os identificadores e aliases legados distribuídos com a base de fusos do Go 1.27.4; não representa todas as cidades. Mais de uma cidade pode compartilhar o mesmo fuso.
+
+- **URL:** `/api/v1/timezones`
+- **Método:** `GET`
+
+#### Exemplo de Requisição:
+```bash
+curl -i "http://localhost:8080/api/v1/timezones"
+```
+
+#### Resposta de Sucesso (`200 OK`):
+```json
+{
+  "timezones": [
+    "Africa/Abidjan",
+    "Africa/Accra",
+    "Africa/Addis_Ababa"
+  ]
+}
+```
+
+Use um valor retornado no endpoint para consultar o horário, por exemplo `Africa/Tunis` ou `America/Maceio`. O arquivo `internal/service/timezones.txt` contém a lista versionada. Para atualizá-la junto com o banco de fusos do toolchain Go:
+
+```bash
+unzip -Z1 "$(go env GOROOT)/lib/time/zoneinfo.zip" | LC_ALL=C sort -u > internal/service/timezones.txt
+```
+
+---
+
+### 3. Health Check
 Verifica se a aplicação está saudável e respondendo.
 
 - **URL:** `/health`
@@ -127,6 +160,9 @@ go tool cover -html=coverage.out
 go test -race -coverprofile=coverage.out ./...
 go tool cover -html=coverage.out
 ```
+
+A cobertura reportada pelo SonarCloud deve refletir o código Go da aplicação. Os arquivos gerados em `docs/` e o script k6 em `tests/load/` não são código de produção e ficam excluídos da análise de cobertura.
+
 ### Teste de carga com k6
 
 Os testes unitários validam os casos funcionais. Para medir a API por HTTP sob carga local, instale o [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/) e inicie a aplicação:

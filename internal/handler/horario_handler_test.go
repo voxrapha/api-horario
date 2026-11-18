@@ -41,6 +41,12 @@ func TestGetHorarioHandler(t *testing.T) {
 			statusEsperado: http.StatusBadRequest,
 			erroEsperado:   "timezone inválido: utilize o padrão IANA (ex: America/Sao_Paulo)",
 		},
+		{
+			nome:           "nome de localidade que nao e identificador IANA",
+			url:            "/api/v1/horario?timezone=America%2FSergipe",
+			statusEsperado: http.StatusBadRequest,
+			erroEsperado:   "timezone inválido: utilize o padrão IANA (ex: America/Sao_Paulo)",
+		},
 	}
 
 	for _, teste := range testes {
@@ -99,5 +105,27 @@ func TestHealthCheckHandler(t *testing.T) {
 	}
 	if resposta["status"] != "ok" {
 		t.Errorf("status esperado %q, recebeu %q", "ok", resposta["status"])
+	}
+}
+
+func TestGetTimezonesHandler(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/timezones", nil)
+	rec := httptest.NewRecorder()
+
+	GetTimezonesHandler(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status esperado %d, recebeu %d", http.StatusOK, rec.Code)
+	}
+	if contentType := rec.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type esperado application/json, recebeu %q", contentType)
+	}
+
+	var resposta service.TimezonesResponse
+	if err := json.Unmarshal(rec.Body.Bytes(), &resposta); err != nil {
+		t.Fatalf("erro ao decodificar JSON: %v", err)
+	}
+	if len(resposta.Timezones) < 500 {
+		t.Errorf("esperava lista ampla de fusos IANA, recebeu %d", len(resposta.Timezones))
 	}
 }
